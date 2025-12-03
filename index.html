@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IPDR Analysis - BPSPA</title>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Bright, Clean "Tech-Day" Theme */
+            --bg-gradient: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+            --card-bg: #ffffff;
+            --primary: #0984e3;
+            --secondary: #6c5ce7;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --accent-bg: #f1f2f6;
+            --success: #00b894;
+            --danger: #d63031;
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+        }
+
+        /* --- SLIDE WRAPPER --- */
+        .presentation-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* --- CARD DESIGN --- */
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 40px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            background: -webkit-linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            color: var(--text-main);
+            margin-bottom: 30px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--primary);
+            margin: 8px auto 0;
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        p, li {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        ul {
+            list-style: none;
+            text-align: left;
+            margin-top: 10px;
+        }
+
+        li {
+            padding-left: 20px;
+            position: relative;
+        }
+
+        li::before {
+            content: '•';
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+            position: absolute;
+            left: 0;
+            top: -2px;
+        }
+
+        /* --- LAYOUTS --- */
+        .feature-box {
+            background: var(--accent-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s;
+            height: 100%;
+        }
+        
+        .feature-box:hover {
+            background: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transform: translateY(-3px);
+            border: 1px solid #eee;
+        }
+
+        .feature-box i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: -webkit-linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Grids */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .hero-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            background: var(--accent-bg);
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* Code / Data Display */
+        .code-display {
+            font-family: 'Source Code Pro', monospace;
+            background: #2d3436;
+            color: #00cec9;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            margin: 10px 0;
+            display: inline-block;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+
+        .highlight-tag {
+            background: #ffeaa7;
+            color: #d63031;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-btn {
+            position: fixed;
+            bottom: 25px;
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            color: var(--primary);
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .prev { left: 20px; }
+        .next { right: 20px; }
+        .hidden { display: none; }
+
+        .counter {
+            position: fixed;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.8);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* --- RESPONSIVE FIXES --- */
+        /* Increased breakpoint to 1024px to ensure even large tablets/phones stack vertically */
+        @media (max-width: 1024px) {
+            .grid-2, .grid-3 { 
+                display: flex;
+                flex-direction: column; /* Force Vertical Stack */
+                width: 100%;
+            } 
+            .card { padding: 30px 20px; max-height: 85vh; }
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.4rem; }
+            
+            /* Ensure cards take full width */
+            .feature-box {
+                width: 100%;
+            }
+
+            @media (orientation: landscape) {
+                /* Optional: In landscape, allow grid if height is limited */
+                .grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
+                .hero-icon { width: 60px; height: 60px; font-size: 2rem; margin-bottom: 10px; }
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="presentation-container">
+
+    <!-- Slide 1: Title -->
+    <div class="slide active">
+        <div class="card">
+            <div class="hero-icon"><i class="fa-solid fa-fingerprint"></i></div>
+            <h1>Digital Investigation<br>& IPDR Analysis</h1>
+            <p style="margin-top: 10px; font-size: 1.2rem; color: var(--secondary);">Part 1: The Foundation</p>
+            <div style="margin-top: 40px; width: 100%; border-top: 1px solid #dfe6e9; padding-top: 20px;">
+                <p><strong>Prepared By:</strong> Dibakar Prasad Das</p>
+                <p><strong>For:</strong> BPSPA (Biju Patnaik State Police Academy)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Evolution -->
+    <div class="slide">
+        <div class="card">
+            <h2>The Evolution: CDR to IPDR</h2>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <i class="fa-solid fa-phone-volume"></i>
+                    <h3>CDR (Old)</h3>
+                    <p>Call Detail Record</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li>GSM Voice Calls</li>
+                        <li>Tracked via SIM & Tower</li>
+                        <li>Success: <strong>High</strong></li>
+                    </ul>
+                </div>
+                <div class="feature-box">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <h3>IPDR (New)</h3>
+                    <p>Internet Protocol Detail Record</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li>WhatsApp, Telegram, Signal</li>
+                        <li>Tracked via IP Data Logs</li>
+                        <li>Success: <strong>Low</strong> (without IPDR)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Why CDR Failed -->
+    <div class="slide">
+        <div class="card">
+            <h2>Why CDR Failed</h2>
+            <div class="grid-3">
+                <div class="feature-box">
+                    <i class="fa-solid fa-tower-cell"></i>
+                    <h3>Voice Line</h3>
+                    <p>Traditional tapping works here.</p>
+                </div>
+                <div class="feature-box" style="background: #fff0f0;">
+                    <i class="fa-solid fa-ban" style="color: var(--danger) !important; -webkit-text-fill-color: initial;"></i>
+                    <h3 style="color: var(--danger);">The Gap</h3>
+                    <p>Apps use Data Cloud, ignoring Voice Switch.</p>
+                </div>
+                <div class="feature-box">
+                    <i class="fa-solid fa-cloud"></i>
+                    <h3>Data Line</h3>
+                    <p>CDR sees "Net Used" but not "Who Spoke".</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: What is IPDR -->
+    <div class="slide">
+        <div class="card">
+            <h2>What is IPDR?</h2>
+            <div class="feature-box" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                <p style="font-size: 1.1rem;">It is the <strong>Transaction Log</strong> of internet usage maintained by the ISP.</p>
+                <span class="highlight-tag" style="margin-top: 10px;">The "Itemized Bill" of the digital world.</span>
+            </div>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <h3>Records</h3>
+                    <p>Who, When, Where, Volume</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Source</h3>
+                    <p>ISPs (Jio, Airtel, Vi, BSNL)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Envelope Analogy -->
+    <div class="slide">
+        <div class="card">
+            <h2>The Envelope Analogy</h2>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <i class="fa-solid fa-envelope-open-text" style="color: #b2bec3 !important; -webkit-text-fill-color: initial;"></i>
+                    <h3>CDR (Postcard)</h3>
+                    <p>Anyone handling it can read the message on the back.</p>
+                </div>
+                <div class="feature-box">
+                    <i class="fa-solid fa-envelope-circle-check"></i>
+                    <h3>IPDR (Sealed)</h3>
+                    <ul style="font-size: 0.9rem;">
+                        <li>See <strong>Address</strong> (IP)</li>
+                        <li>See <strong>Timestamp</strong></li>
+                        <li style="color: var(--danger);">Cannot read letter (Encrypted)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Switching -->
+    <div class="slide">
+        <div class="card">
+            <h2>Circuit vs. Packet Switching</h2>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <i class="fa-solid fa-train-subway"></i>
+                    <h3>Circuit (Old)</h3>
+                    <p><strong>Analogy: Private Train Track</strong></p>
+                    <p>Dedicated line. One train at a time. Easy to trace.</p>
+                </div>
+                <div class="feature-box">
+                    <i class="fa-solid fa-car-side"></i>
+                    <h3>Packet (New)</h3>
+                    <p><strong>Analogy: Highway Traffic</strong></p>
+                    <p>Packets take different routes. Harder to trace.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: What is IP? -->
+    <div class="slide">
+        <div class="card">
+            <div class="hero-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+            <h2>What is an IP Address?</h2>
+            <h3>Internet Protocol Address</h3>
+            <p>The <strong>Digital Address</strong> for every device on the internet.</p>
+            <div class="feature-box" style="margin-top: 20px; background: #e3f2fd;">
+                <p>Every house needs a postal address.</p>
+                <p>Every computer needs an IP.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Who Controls IPs? -->
+    <div class="slide">
+        <div class="card">
+            <h2>Who Manages IPs?</h2>
+            <div class="grid-3">
+                <div class="feature-box">
+                    <h3 style="color: #6c5ce7;">ICANN / IANA</h3>
+                    <p style="font-size: 0.8rem; font-weight: bold; margin-bottom: 10px;">Global Authority</p>
+                    <p style="font-size: 0.7rem; margin-bottom: 5px;"><strong>ICANN:</strong> Internet Corp for Assigned Names & Numbers</p>
+                    <p style="font-size: 0.7rem;"><strong>IANA:</strong> Internet Assigned Numbers Authority</p>
+                </div>
+                <div class="feature-box">
+                    <h3 style="color: #0984e3;">APNIC</h3>
+                    <p style="font-size: 0.8rem; font-weight: bold;">Asia-Pacific</p>
+                    <p style="font-size: 0.8rem;">Allocates to Asia Region</p>
+                </div>
+                <div class="feature-box">
+                    <h3 style="color: #e17055;">NIXI</h3>
+                    <p style="font-size: 0.8rem; font-weight: bold;">India</p>
+                    <p style="font-size: 0.8rem;">National Internet Exchange of India</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Public IP -->
+    <div class="slide">
+        <div class="card">
+            <h2>Public IP (External)</h2>
+            <div class="feature-box" style="flex-direction: row; text-align: left; align-items: center; justify-content: center; flex-wrap: wrap;">
+                <i class="fa-solid fa-building" style="font-size: 4rem; margin-right: 30px; margin-bottom: 0;"></i>
+                <div>
+                    <h3>The Building Gate</h3>
+                    <p><strong>Analogy:</strong> Main Address of Apartment Complex.</p>
+                    <ul>
+                        <li>Seen by outside world (Google, FB).</li>
+                        <li>Traceable: <strong>Yes</strong> (Leads to ISP).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Private IP -->
+    <div class="slide">
+        <div class="card">
+            <h2>Private IP (Internal)</h2>
+            <div class="feature-box" style="flex-direction: row; text-align: left; align-items: center; justify-content: center; flex-wrap: wrap;">
+                <i class="fa-solid fa-house-user" style="font-size: 4rem; margin-right: 30px; margin-bottom: 0; color: var(--warning) !important; -webkit-text-fill-color: initial;"></i>
+                <div>
+                    <h3>The Intercom</h3>
+                    <p><strong>Analogy:</strong> Flat Number (e.g., Flat 302).</p>
+                    <ul>
+                        <li>Used only inside local network.</li>
+                        <li>Traceable: <strong>No</strong> (Not directly).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Cafe Scenario -->
+    <div class="slide">
+        <div class="card">
+            <h2>Scenario: Cafe WiFi</h2>
+            <p style="margin-bottom: 20px;">Criminal connects to WiFi at a Coffee Shop.</p>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <span class="code-display">192.168.1.5</span>
+                    <h3>Private IP</h3>
+                    <p>Router to Phone</p>
+                </div>
+                <div class="feature-box">
+                    <span class="code-display">122.16.45.2</span>
+                    <h3>Public IP</h3>
+                    <p>ISP to Router</p>
+                </div>
+            </div>
+            <p style="margin-top: 20px; font-weight: 600; color: var(--primary);">Track Public IP -> Find Cafe -> Use Logs -> Find Phone.</p>
+        </div>
+    </div>
+
+    <!-- Slide 12: Reserved IPv4 -->
+    <div class="slide">
+        <div class="card">
+            <h2>Reserved IPv4 (Internal)</h2>
+            <span class="highlight-tag" style="background: #ff7675; color: white; margin-bottom: 20px;">Do not send legal notices for these!</span>
+            <div class="grid-3">
+                <div class="feature-box">
+                    <h3>Class A</h3>
+                    <p class="code-display" style="font-size: 0.9rem;">10.0.0.0<br>to<br>10.255.255.255</p>
+                    <p>Corporates</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Class B</h3>
+                    <p class="code-display" style="font-size: 0.9rem;">172.16.0.0<br>to<br>172.31.255.255</p>
+                    <p>Broadband</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Class C</h3>
+                    <p class="code-display" style="font-size: 0.9rem;">192.168.0.0<br>to<br>192.168.255.255</p>
+                    <p>Home WiFi</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 13: Reserved IPv6 -->
+    <div class="slide">
+        <div class="card">
+            <h2>Reserved IPv6</h2>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <h3>Unique Local</h3>
+                    <span class="code-display">fc00:: / fd00::</span>
+                    <p>IPv6 version of "Private IP".</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Link-Local</h3>
+                    <span class="code-display">fe80::</span>
+                    <p>Talks only to Router ("Next Wire").</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 14: IPv4 Standard -->
+    <div class="slide">
+        <div class="card">
+            <h2>IPv4 (The Old Standard)</h2>
+            <div class="feature-box">
+                <span class="code-display" style="font-size: 1.5rem;">49.32.112.55</span>
+                <p style="margin-top: 15px;">Format: Numbers Only (32-bit)</p>
+            </div>
+            <p style="color: var(--danger); margin-top: 20px; font-weight: bold;">Problem: Exhaustion (We ran out).</p>
+        </div>
+    </div>
+
+    <!-- Slide 15: IPv6 Standard -->
+    <div class="slide">
+        <div class="card">
+            <h2>IPv6 (The New Standard)</h2>
+            <div class="feature-box">
+                <span class="code-display" style="font-size: 1rem; word-break: break-all;">2001:0db8:85a3::8a2e:0370:7334</span>
+                <p style="margin-top: 15px;">Format: Alphanumeric (128-bit)</p>
+            </div>
+            <p style="color: var(--success); margin-top: 20px; font-weight: bold;">Benefit: Unlimited Space.</p>
+        </div>
+    </div>
+
+    <!-- Slide 16: Static IP -->
+    <div class="slide">
+        <div class="card">
+            <h2>Static IP (Fixed)</h2>
+            <div class="feature-box" style="flex-direction: row; text-align: left; align-items: center; justify-content: center; flex-wrap: wrap;">
+                <i class="fa-solid fa-server" style="font-size: 3.5rem; margin-right: 30px; margin-bottom: 0;"></i>
+                <div>
+                    <h3>The House</h3>
+                    <p><strong>Behavior:</strong> Does not change.</p>
+                    <p><strong>Used By:</strong> Servers, VPNs.</p>
+                    <p>Like a house, it stays in one place.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 17: Dynamic IP -->
+    <div class="slide">
+        <div class="card">
+            <h2>Dynamic IP (Changing)</h2>
+            <div class="feature-box" style="flex-direction: row; text-align: left; align-items: center; justify-content: center; flex-wrap: wrap;">
+                <i class="fa-solid fa-mobile-screen" style="font-size: 3.5rem; margin-right: 30px; margin-bottom: 0;"></i>
+                <div>
+                    <h3>The Hotel Room</h3>
+                    <p><strong>Behavior:</strong> Changes on restart.</p>
+                    <p><strong>Used By:</strong> Mobiles (4G/5G).</p>
+                    <p>Today you are in Room 101, tomorrow someone else is.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 18: Risk -->
+    <div class="slide">
+        <div class="card">
+            <h2 style="color: var(--danger);">Investigation Risk</h2>
+            <div class="feature-box" style="background: #fff0f0; border-color: #ff7675;">
+                <h3 style="color: var(--danger);">Warning: Time Sync is Critical</h3>
+                <div style="text-align: left; width: 100%; margin-top: 20px;">
+                    <p><strong>09:00 AM:</strong> IP assigned to <span style="color: var(--danger); font-weight: bold;">Suspect</span>.</p>
+                    <p><strong>09:10 AM:</strong> Suspect restarts phone.</p>
+                    <p><strong>09:11 AM:</strong> IP assigned to <span style="color: var(--success); font-weight: bold;">Neighbor</span>.</p>
+                </div>
+                <span class="highlight-tag" style="margin-top: 20px;">If clock is wrong by 15 mins, you catch the wrong person.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 19: Decoding Intro -->
+    <div class="slide">
+        <div class="card">
+            <div class="hero-icon"><i class="fa-solid fa-file-contract"></i></div>
+            <h2>Decoding the Indian Log</h2>
+            <p><strong>Department of Telecommunications (DoT)</strong> mandates a specific format.</p>
+            <p>It is a Legal Document.</p>
+        </div>
+    </div>
+
+    <!-- Slide 20: User ID -->
+    <div class="slide">
+        <div class="card">
+            <h2>1. User Identification</h2>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <h3>MSISDN</h3>
+                    <p style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">Mobile Station Int. Subscriber Directory Number</p>
+                    <p>Mobile Number</p>
+                    <span class="highlight-tag">Primary ID</span>
+                </div>
+                <div class="feature-box">
+                    <h3>IMSI</h3>
+                    <p style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">International Mobile Subscriber Identity</p>
+                    <p>SIM Card ID</p>
+                    <span class="highlight-tag">Hardware ID (SIM)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 21: Device ID -->
+    <div class="slide">
+        <div class="card">
+            <h2>2. Device Identification</h2>
+            <div class="feature-box">
+                <i class="fa-solid fa-laptop-code"></i>
+                <h3>MAC Address</h3>
+                <p><strong>Media Access Control</strong></p>
+                <p>Unique hardware fingerprint of the device.</p>
+                <p style="font-weight: bold;">Remains same even if SIM changes.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 22: Source IP -->
+    <div class="slide">
+        <div class="card">
+            <h2>3. Source IP (Suspect)</h2>
+            <div class="feature-box">
+                <i class="fa-solid fa-user-secret"></i>
+                <h3>The Public IP</h3>
+                <p>Address assigned to suspect by ISP.</p>
+                <p style="color: var(--danger); margin-top: 10px;">Note: For mobiles, this is temporary and shared.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 23: Destination IP -->
+    <div class="slide">
+        <div class="card">
+            <h2>4. Destination IP (Target)</h2>
+            <div class="feature-box">
+                <i class="fa-solid fa-server"></i>
+                <h3>The Server Address</h3>
+                <p>Shows Company Server (not a person).</p>
+                <span class="code-display" style="margin-top: 15px;">157.240.22.35 = WhatsApp Server</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 24: Time & Volume -->
+    <div class="slide">
+        <div class="card">
+            <h2>5. Time & Volume</h2>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <i class="fa-regular fa-clock"></i>
+                    <h3>Timestamp</h3>
+                    <p>Start & End Time</p>
+                    <span class="highlight-tag">Check: IST or UTC?</span>
+                </div>
+                <div class="feature-box">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <h3>Volume</h3>
+                    <p>Uplink / Downlink</p>
+                    <span class="highlight-tag">Small = Text. Large = Video.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 25: Exercise -->
+    <div class="slide">
+        <div class="card">
+            <h2>Reading a Row</h2>
+            <div class="code-display" style="font-size: 0.9rem; margin-bottom: 20px; width: 100%; word-break: break-all;">
+                9876543210 | 10:05:00 | 100.10.10.5 | 157.240.22.35 | 5KB(Up)
+            </div>
+            <div class="grid-2">
+                <div class="feature-box" style="align-items: flex-start; text-align: left;">
+                    <ul>
+                        <li><strong>User:</strong> 9876543210</li>
+                        <li><strong>Time:</strong> 10:05 AM</li>
+                        <li><strong>Source:</strong> 100.10.10.5</li>
+                    </ul>
+                </div>
+                <div class="feature-box" style="align-items: flex-start; text-align: left;">
+                    <ul>
+                        <li><strong>Target:</strong> 157.240... (FB)</li>
+                        <li><strong>Data:</strong> 5KB (Text Msg)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 26: End -->
+    <div class="slide">
+        <div class="card">
+            <h2 style="color: var(--primary);">Looking Ahead...</h2>
+            <div class="grid-2">
+                <div class="feature-box">
+                    <h3>1. The Mystery of NAT</h3>
+                    <p>Why 500 people share one IP and how to find the real user.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>2. Destination Analysis</h3>
+                    <p>How to prove an IP belongs to WhatsApp, Google, or a Criminal Server.</p>
+                </div>
+            </div>
+            <p style="margin-top: 40px; font-weight: bold; color: var(--text-muted);">End of Part 1</p>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <button class="nav-btn prev hidden" onclick="changeSlide(-1)">
+        <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <button class="nav-btn next" onclick="changeSlide(1)">
+        <i class="fa-solid fa-chevron-right"></i>
+    </button>
+
+    <div class="counter" id="counter">1 / 26</div>
+
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+    const counter = document.getElementById('counter');
+    const totalSlides = slides.length;
+
+    function updateUI() {
+        if (currentSlide === 0) prevBtn.classList.add('hidden');
+        else prevBtn.classList.remove('hidden');
+
+        if (currentSlide === totalSlides - 1) nextBtn.classList.add('hidden');
+        else nextBtn.classList.remove('hidden');
+
+        counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+    }
+
+    function changeSlide(direction) {
+        slides[currentSlide].classList.remove('active');
+        currentSlide += direction;
+        
+        if (currentSlide < 0) currentSlide = 0;
+        if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+
+        slides[currentSlide].classList.add('active');
+        updateUI();
+    }
+
+    // Keyboard
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') if (currentSlide < totalSlides - 1) changeSlide(1);
+        if (e.key === 'ArrowLeft') if (currentSlide > 0) changeSlide(-1);
+    });
+
+    // Swipe with Scroll Protection
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+    
+    document.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, {passive: false});
+    
+    document.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        handleSwipe();
+    }, {passive: false});
+
+    // Detect if the user is interacting with a horizontally scrollable element
+    // e.g., code blocks or tables that might overflow
+    function isHorizontallyScrollable(element) {
+        let el = element;
+        while (el && el !== document.body) {
+            if (el.scrollWidth > el.clientWidth) {
+                return true;
+            }
+            el = el.parentElement;
+        }
+        return false;
+    }
+
+    function handleSwipe() {
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        // SCROLL PROTECTION: 
+        // 1. If vertical distance is significant (> 40px), assume user is scrolling vertical content.
+        if (Math.abs(diffY) > 40) return;
+
+        // 2. Horizontal swipe must be clearly dominant
+        if (Math.abs(diffX) > (Math.abs(diffY) * 2)) {
+            if (diffX < -50 && currentSlide < totalSlides - 1) {
+                changeSlide(1); // Swipe Left -> Next
+            }
+            if (diffX > 50 && currentSlide > 0) {
+                changeSlide(-1); // Swipe Right -> Prev
+            }
+        }
+    }
+
+    updateUI();
+</script>
+
+</body>
+</html>
+
